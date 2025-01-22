@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 
 import { ConvexClientProvider } from '@/components/convex-client-provider';
+import { JotaiProvider } from '@/components/jotai-provider';
 import { Modal } from '@/components/modal';
 
 import { ConvexAuthNextjsServerProvider } from '@convex-dev/auth/nextjs/server';
@@ -29,9 +30,11 @@ export default function RootLayout({
           suppressHydrationWarning={true}
         >
           <ConvexClientProvider>
-            <Toaster />
-            <Modal />
-            {children}
+            <JotaiProvider>
+              <Toaster />
+              <Modal />
+              {children}
+            </JotaiProvider>
           </ConvexClientProvider>
         </body>
       </html>
