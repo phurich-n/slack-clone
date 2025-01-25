@@ -2,13 +2,7 @@ import { ImageIcon, Smile, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import Quill, { Delta, Op, QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
-import {
-  MutableRefObject,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { MdSend } from 'react-icons/md';
 import { PiTextAa } from 'react-icons/pi';
 
@@ -29,7 +23,7 @@ interface EditorProps {
   placeholder?: string;
   defaultValue?: Delta | Op[];
   disabled?: boolean;
-  innerRef?: MutableRefObject<Quill | null>;
+  innerRef?: RefObject<Quill | null>;
   variant?: 'create' | 'update';
 }
 
@@ -83,14 +77,24 @@ const Editor = ({
             enter: {
               key: 'Enter',
               handler: () => {
-                return;
+                const text = quill.getText();
+                const addedImage = imageElementRef.current?.files?.[0] || null;
+
+                const isEmpty =
+                  !addedImage &&
+                  text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
+
+                if (isEmpty) return;
+
+                const body = JSON.stringify(quill.getContents());
+                submitRef.current?.({ body, image: addedImage });
               },
             },
             shift_enter: {
               key: 'Enter',
               shiftKey: true,
               handler: () => {
-                quill.insertText(quill.getSelection()?.index || 0, '\n');
+                quill.insertText(quill.getSelection()?.index ?? 0, '\n');
               },
             },
           },
@@ -136,13 +140,13 @@ const Editor = ({
     }
   };
 
-  const onEmojiSelect = (emoji: any) => {
+  const onEmojiSelect = (emoji: { native: string }) => {
     const quill = quillRef.current!;
 
-    quill?.insertText(quill.getSelection()?.index || 0, emoji.native);
+    quill?.insertText(quill.getSelection()?.index ?? 0, emoji.native);
   };
 
-  const isEmpty = text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
+  const isEmpty = !image && text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
 
   return (
     <div className="flex flex-col">
@@ -153,7 +157,12 @@ const Editor = ({
         onChange={(event) => setImage(event.target.files?.[0] || null)}
         className="hidden"
       />
-      <div className="flex flex-col overflow-hidden transition bg-white border rounded-md border-slate-200 focus-within:border-slate-300 focus-within:shadow-sm">
+      <div
+        className={cn(
+          'flex flex-col overflow-hidden transition bg-white border rounded-md border-slate-200 focus-within:border-slate-300 focus-within:shadow-sm',
+          disabled && 'opacity-50'
+        )}
+      >
         <div ref={containerRef} className="h-full ql-custom" />
         {!!image && (
           <div className="p-2">
@@ -214,14 +223,19 @@ const Editor = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {}}
+                onClick={onCancel}
                 disabled={disabled}
               >
                 Cancel
               </Button>
               <Button
                 disabled={disabled || isEmpty}
-                onClick={() => {}}
+                onClick={() => {
+                  onSubmit({
+                    body: JSON.stringify(quillRef.current?.getContents()),
+                    image,
+                  });
+                }}
                 size="sm"
                 className="bg-[#007a5a] hover:bg-[#007a5a]/80 text-white"
               >
@@ -232,7 +246,12 @@ const Editor = ({
           {variant === 'create' && (
             <Button
               disabled={disabled || isEmpty}
-              onClick={() => {}}
+              onClick={() => {
+                onSubmit({
+                  body: JSON.stringify(quillRef.current?.getContents()),
+                  image,
+                });
+              }}
               size="iconSm"
               className={cn(
                 'ml-auto',

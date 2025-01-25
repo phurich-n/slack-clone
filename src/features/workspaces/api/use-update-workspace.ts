@@ -37,6 +37,7 @@ export const useUpdateWorkspace = () => {
 
         const response = await mutation(values);
         options?.onSuccess?.(response);
+        return response;
       } catch (error) {
         setStatus('error');
         options?.onError?.(error as Error);
