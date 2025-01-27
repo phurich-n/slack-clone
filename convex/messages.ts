@@ -56,6 +56,68 @@ const populateMember = (ctx: QueryCtx, memberId: Id<'members'>) => {
   return ctx.db.get(memberId);
 };
 
+export const remove = mutation({
+  args: {
+    id: v.id('messages'),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const message = await ctx.db.get(args.id);
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    const member = await getMember(ctx, message.workspaceId, userId);
+
+    if (!member || member._id !== message.memberId) {
+      throw new Error('Unauthorized');
+    }
+
+    await ctx.db.delete(args.id);
+
+    return args.id;
+  },
+});
+
+export const update = mutation({
+  args: {
+    id: v.id('messages'),
+    body: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+
+    if (!userId) {
+      throw new Error('Unauthorized');
+    }
+
+    const message = await ctx.db.get(args.id);
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    const member = await getMember(ctx, message.workspaceId, userId);
+
+    if (!member || member._id !== message.memberId) {
+      throw new Error('Unauthorized');
+    }
+
+    await ctx.db.patch(args.id, {
+      body: args.body,
+      updatedAt: Date.now(),
+    });
+
+    return args.id;
+  },
+});
+
 const getMember = async (
   ctx: QueryCtx,
   workspaceId: Id<'workspaces'>,
@@ -156,6 +218,7 @@ export const get = query({
             );
 
             const reactionsWithoutMemberIdProperty = dedupedReactions.map(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               ({ memberId, ...rest }) => rest
             );
 

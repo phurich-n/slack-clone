@@ -169,6 +169,7 @@ const Editor = ({
             <div className="relative size-[62px] flex items-center justify-center group/image">
               <Hint label="Remove image">
                 <button
+                  disabled={disabled}
                   onClick={() => {
                     setImage(null);
                     imageElementRef.current?.click();
