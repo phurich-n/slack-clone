@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 
 import { useConfirm } from '@/hooks/use-confirm';
+import { usePanel } from '@/hooks/use-panel';
 
 import { cn } from '@/lib/utils';
 
@@ -13,6 +14,7 @@ import { useToggleReaction } from '@/features/reactions/api/use-toggle-reaction'
 import { Doc, Id } from '../../convex/_generated/dataModel';
 import { Hint } from './hint';
 import { Reactions } from './reactions';
+import { ThreadBar } from './thread-bar';
 import { Thumbnail } from './thumbnail';
 import { Toolbar } from './toolbar';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -42,6 +44,7 @@ interface MessageProps {
   hideThreadButton?: boolean;
   threadCount?: number;
   threadImage?: string;
+  threadName?: string;
   threadTimestamp?: number;
 }
 
@@ -66,8 +69,11 @@ export const Message = ({
   hideThreadButton,
   threadCount,
   threadImage,
+  threadName,
   threadTimestamp,
 }: MessageProps) => {
+  const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
+
   const [ConfirmDialog, confirm] = useConfirm(
     'Delete message',
     'Are you sure you want to delete this message? This cannot be undone.'
@@ -80,7 +86,7 @@ export const Message = ({
   const { mutate: toggleReaction, isPending: isTogglingReaction } =
     useToggleReaction();
 
-  const isPending = isUpdatingMessage;
+  const isPending = isUpdatingMessage || isTogglingReaction;
 
   const handleReaction = (value: string) => {
     toggleReaction(
@@ -104,7 +110,9 @@ export const Message = ({
         onSuccess: () => {
           toast.success('Message deleted');
 
-          // TODO: Close thread if opened
+          if (parentMessageId === id) {
+            onClose();
+          }
         },
         onError: () => {
           toast.error('Failed to delete message');
@@ -166,6 +174,13 @@ export const Message = ({
                   </span>
                 ) : null}
                 <Reactions data={reactions} onChange={handleReaction} />
+                <ThreadBar
+                  count={threadCount}
+                  image={threadImage}
+                  name={threadName}
+                  timestamp={threadTimestamp}
+                  onClick={() => onOpenMessage(id)}
+                />
               </div>
             )}
           </div>
@@ -174,7 +189,7 @@ export const Message = ({
               isAuthor={isAuthor}
               isPending={isPending}
               handleEdit={() => setEditingId(id)}
-              handleThread={() => {}}
+              handleThread={() => onOpenMessage(id)}
               handleDelete={handleRemove}
               handleReaction={handleReaction}
               hideThreadButton={hideThreadButton}
@@ -199,7 +214,7 @@ export const Message = ({
         )}
       >
         <div className="flex items-start gap-2">
-          <button>
+          <button onClick={() => onOpenProfile(memberId)}>
             <Avatar>
               <AvatarImage src={authorImage} />
               <AvatarFallback>{avatarFallback}</AvatarFallback>
@@ -219,7 +234,7 @@ export const Message = ({
             <div className="flex flex-col w-full overflow-hidden">
               <div className="text-sm">
                 <button
-                  onClick={() => {}}
+                  onClick={() => onOpenProfile(memberId)}
                   className="font-bold text-primary hover:underline"
                 >
                   {authorName}
@@ -237,6 +252,13 @@ export const Message = ({
                 <span className="text-xs text-muted-foreground">(edited)</span>
               ) : null}
               <Reactions data={reactions} onChange={handleReaction} />
+              <ThreadBar
+                count={threadCount}
+                image={threadImage}
+                name={threadName}
+                timestamp={threadTimestamp}
+                onClick={() => onOpenMessage(id)}
+              />
             </div>
           )}
         </div>
@@ -245,7 +267,7 @@ export const Message = ({
             isAuthor={isAuthor}
             isPending={isPending}
             handleEdit={() => setEditingId(id)}
-            handleThread={() => {}}
+            handleThread={() => onOpenMessage(id)}
             handleDelete={handleRemove}
             handleReaction={handleReaction}
             hideThreadButton={hideThreadButton}

@@ -23,6 +23,7 @@ type CreateMessageValue = {
   body: string;
   image: Id<'_storage'> | undefined;
 };
+
 export const ChatInput = ({ placeholder }: ChatInputProps) => {
   const [editorKey, setEditorKey] = useState(0);
   const [isPending, setIsPending] = useState(false);
