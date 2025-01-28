@@ -1,10 +1,4 @@
-import {
-  MessageSquare,
-  MessageSquareTextIcon,
-  Pencil,
-  Smile,
-  Trash,
-} from 'lucide-react';
+import { MessageSquareTextIcon, Pencil, Smile, Trash } from 'lucide-react';
 
 import { EmojiPopover } from './emoji-popover';
 import { Hint } from './hint';
@@ -31,10 +25,10 @@ export const Toolbar = ({
 }: ToolbarProps) => {
   return (
     <div className="absolute top-0 right-5">
-      <div className="group-hover:opacity-100 opacity-0 transition-opacity border bg-white rounded-md shadow-sm">
+      <div className="transition-opacity bg-white border rounded-md shadow-sm opacity-0 group-hover:opacity-100">
         <EmojiPopover
           hint="Add reaction"
-          onEmojiSelect={(emoji) => handleReaction(emoji.native)}
+          onEmojiSelect={(emoji) => handleReaction(emoji)}
         >
           <Button variant="ghost" size="iconSm" disabled={isPending}>
             <Smile className="size-4" />

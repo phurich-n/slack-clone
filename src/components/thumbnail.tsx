@@ -1,11 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { XIcon } from 'lucide-react';
-
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
@@ -26,7 +22,7 @@ export function Thumbnail({ url }: Readonly<ThumbnailProps>) {
           <img
             src={url}
             alt="Thumbnail"
-            className="rounded-md object-cover size-full"
+            className="object-cover rounded-md size-full"
           />
         </div>
       </DialogTrigger>
@@ -37,7 +33,7 @@ export function Thumbnail({ url }: Readonly<ThumbnailProps>) {
         <img
           src={url}
           alt="Thumbnail"
-          className="rounded-md object-cover size-full"
+          className="object-cover rounded-md size-full"
         />
       </DialogContent>
     </Dialog>

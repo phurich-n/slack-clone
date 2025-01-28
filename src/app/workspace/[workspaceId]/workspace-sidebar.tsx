@@ -41,7 +41,7 @@ export const WorkspaceSidebar = () => {
     workspaceId,
   });
 
-  if (memberLoading || workspaceLoading) {
+  if (memberLoading || workspaceLoading || channelsLoading || membersLoading) {
     return (
       <div className="flex flex-col bg-[#5E2C5F] h-full items-center justify-center">
         <Loader className="text-white size-5 animate-spin" />

@@ -19,6 +19,7 @@ export const Header = ({
   return (
     <div className="bg-white border-b h-[49px] flex items-center px-4 overflow-hidden">
       <Button
+        onClick={onClick}
         variant="ghost"
         className="w-auto px-2 overflow-hidden text-lg font-semibold"
       >
